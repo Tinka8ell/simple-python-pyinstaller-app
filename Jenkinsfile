@@ -5,18 +5,14 @@ pipeline {
     }
     stages {
         stage('Build') {
-            agent {
-                dockerfile true
-            }
+            agent { docker { image 'python3' } }
             steps {
                 sh 'python -m py_compile sources/add2vals.py sources/calc.py'
                 stash(name: 'compiled-results', includes: 'sources/*.py*')
             }
         }
         stage('Test') {
-            agent {
-                dockerfile true
-            }
+            agent { docker { image 'python3' } }
             steps {
                 sh 'py.test --junit-xml test-reports/results.xml sources/test_calc.py'
                 sh 'cat test-reports/results.xml'
@@ -31,12 +27,12 @@ pipeline {
             agent any
             environment { 
                 VOLUME = '$(pwd)/sources:/src'
-                IMAGE = 'cdrx/pyinstaller-linux:latest'
+                IMAGE = 'pyinstaller-pi'
             }
             steps {
                 dir(path: env.BUILD_ID) { 
                     unstash(name: 'compiled-results') 
-                    sh "docker run --rm -v ${VOLUME} ${IMAGE} --platform linux/arm/v8 'pyinstaller -F add2vals.py' "
+                    sh "docker run --rm -v ${VOLUME} ${IMAGE} 'pyinstaller -F add2vals.py' "
                 }
             }
             post {

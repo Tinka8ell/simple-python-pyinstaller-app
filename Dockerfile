@@ -1,6 +1,7 @@
 # Define the base image
 FROM python:3
  
-# Install all the required packages
-RUN pip3 install -r requirements.txt \
+COPY . /simple-python-pyinstaller
+WORKDIR /simple-python-pyinstaller
+RUN pip install --no-cache-dir -r requirements.txt \
  && pip3 install .
